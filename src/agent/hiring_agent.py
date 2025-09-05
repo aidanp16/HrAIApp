@@ -343,25 +343,135 @@ class HiringAgent:
     
     def _route_after_analysis(self, state: HiringState) -> str:
         """
-        Routing logic after request analysis
-        Decides whether to ask questions or go straight to content generation
+        Smart routing logic after request analysis
+        Uses comprehensive context assessment to decide whether to ask questions
         """
         if state.get('error_message'):
             return END
             
-        # Check if we have enough context to skip questions
-        sufficient_context = (
-            state['role_type'] != 'unknown' and 
-            state['company_stage'] != 'unknown' and
-            state['specificity_score'] > 0.6  # High specificity threshold
-        )
+        # Use intelligent assessment to determine if we need questions
+        should_ask_questions = self._should_generate_questions(state)
         
-        if sufficient_context:
-            self.logger.info("Sufficient context available - skipping questions")
-            return "generate_hiring_content"
-        else:
+        if should_ask_questions:
             self.logger.info("Insufficient context - generating questions")
             return "generate_questions"
+        else:
+            self.logger.info("Sufficient context available - skipping questions")
+            return "generate_hiring_content"
+    
+    def _should_generate_questions(self, state: HiringState) -> bool:
+        """
+        Intelligent decision logic for whether to generate questions
+        
+        ALGORITHM:
+        1. Check for critical missing information (deal-breakers)
+        2. Assess information completeness by role type and urgency
+        3. Consider company stage requirements
+        4. Apply contextual thresholds based on scenario
+        
+        Returns True if questions should be generated
+        """
+        
+        # Step 1: Critical missing information (always ask questions)
+        if state['role_type'] == 'unknown':
+            return True  # Must know role type
+            
+        if state['company_stage'] == 'unknown' and state['specificity_score'] < 0.5:
+            return True  # Need stage for low-specificity requests
+        
+        # Step 2: Role-specific context requirements
+        role_needs_questions = self._assess_role_specific_needs(state)
+        if role_needs_questions:
+            return True
+        
+        # Step 3: Urgency-based assessment
+        if state['urgency_level'] == 'high' and not (state['has_budget'] and state['has_timeline']):
+            return True  # Urgent requests need budget/timeline clarity
+        
+        # Step 4: Company stage-specific requirements
+        stage_needs_questions = self._assess_stage_specific_needs(state)
+        if stage_needs_questions:
+            return True
+        
+        # Step 5: Completeness threshold based on specificity and context
+        completeness_score = self._calculate_context_completeness(state)
+        
+        # Dynamic threshold based on role complexity
+        if state['role_type'] in ['executive', 'operations']:
+            threshold = 0.8  # Executive roles need more context
+        elif state['urgency_level'] == 'high':
+            threshold = 0.7  # Urgent requests need clarity
+        else:
+            threshold = 0.75  # Standard threshold
+        
+        return completeness_score < threshold
+    
+    def _assess_role_specific_needs(self, state: HiringState) -> bool:
+        """Check if role type has specific context requirements"""
+        role_type = state['role_type']
+        
+        if role_type == 'executive':
+            # Executive roles need leadership context
+            return not (state['has_timeline'] or state['specificity_score'] > 0.8)
+        
+        if role_type == 'operations':
+            # Operations roles need process context
+            return state['specificity_score'] < 0.8
+        
+        if role_type in ['marketing', 'sales'] and not state['has_budget']:
+            # Marketing/sales roles need budget context for realistic expectations
+            if state['company_stage'] in ['seed', 'series_a', 'growth']:
+                # All scaling companies need budget clarity for competitive hiring
+                return True
+            else:
+                # Unknown/enterprise stage - use specificity threshold
+                return state['specificity_score'] < 0.9
+        
+        return False
+    
+    def _assess_stage_specific_needs(self, state: HiringState) -> bool:
+        """Check if company stage has specific context requirements"""
+        stage = state['company_stage']
+        
+        if stage == 'seed' and not state['has_budget']:
+            # Seed companies need budget reality check
+            return True
+        
+        if stage in ['series_a', 'growth'] and state['role_type'] == 'executive' and not state['has_timeline']:
+            # Scaling companies need exec hire timeline clarity
+            return True
+        
+        return False
+    
+    def _calculate_context_completeness(self, state: HiringState) -> float:
+        """Calculate overall context completeness score (0-1)"""
+        completeness = 0.0
+        total_factors = 0
+        
+        # Basic information completeness (40% weight)
+        if state['role_type'] != 'unknown':
+            completeness += 0.2
+        if state['company_stage'] != 'unknown':
+            completeness += 0.2
+        total_factors += 0.4
+        
+        # Specificity score (30% weight)
+        completeness += state['specificity_score'] * 0.3
+        total_factors += 0.3
+        
+        # Critical details (30% weight)
+        if state['has_budget']:
+            completeness += 0.1
+        if state['has_timeline']:
+            completeness += 0.1
+        
+        # Confidence bonus (high confidence = more complete)
+        avg_confidence = sum(state.get('confidence_scores', {}).values()) / max(len(state.get('confidence_scores', {})), 1)
+        completeness += avg_confidence * 0.1
+        
+        total_factors += 0.3
+        
+        return min(completeness, 1.0)
     
     def _route_after_questions(self, state: HiringState) -> str:
         """

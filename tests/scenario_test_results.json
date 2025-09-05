@@ -1,0 +1,226 @@
+{
+  "test_summary": {
+    "total_tests": 7,
+    "timestamp": "2025-09-05T16:30:08.152557",
+    "avg_score": 100.0
+  },
+  "test_results": [
+    {
+      "scenario_name": "Detailed Engineering Request",
+      "request": "I need to hire a senior backend engineer for my Series A startup, budget $120-140k, need someone with Python/Django experience, team of 15 people, need to fill within 6 weeks for our API scaling project",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "engineering",
+        "company_stage": "series_a",
+        "specificity_level": "high",
+        "should_ask_questions": false
+      },
+      "actual_results": {
+        "role_type": "engineering",
+        "company_stage": "series_a",
+        "specificity_score": 0.85,
+        "questions_generated": 0,
+        "job_description_length": 2645,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:19.071872"
+    },
+    {
+      "scenario_name": "Vague Technical Request",
+      "request": "I need to hire someone technical for my company",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "engineering",
+        "company_stage": "unknown",
+        "specificity_level": "low",
+        "should_ask_questions": true
+      },
+      "actual_results": {
+        "role_type": "engineering",
+        "company_stage": "unknown",
+        "specificity_score": 0.020000000000000073,
+        "questions_generated": 3,
+        "job_description_length": 2898,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:26.338589"
+    },
+    {
+      "scenario_name": "Marketing Role - Growth Stage",
+      "request": "Looking for a growth marketing manager, we're an established company with 100+ employees, need someone with paid acquisition experience",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "marketing",
+        "company_stage": "growth",
+        "specificity_level": "medium",
+        "should_ask_questions": true
+      },
+      "actual_results": {
+        "role_type": "marketing",
+        "company_stage": "growth",
+        "specificity_score": 0.35,
+        "questions_generated": 3,
+        "job_description_length": 2680,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:34.847456"
+    },
+    {
+      "scenario_name": "Urgent Sales Hire",
+      "request": "Need to hire a sales director ASAP, we're a Series A company, revenue is growing fast and we need someone to scale our sales team",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "executive",
+        "company_stage": "series_a",
+        "specificity_level": "medium",
+        "should_ask_questions": true
+      },
+      "actual_results": {
+        "role_type": "executive",
+        "company_stage": "series_a",
+        "specificity_score": 0.44999999999999996,
+        "questions_generated": 3,
+        "job_description_length": 3232,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:43.624193"
+    },
+    {
+      "scenario_name": "Executive Hire - Early Stage",
+      "request": "Startup looking for VP of Engineering, we're pre-revenue but have raised seed funding, need someone who can build the team from scratch",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "executive",
+        "company_stage": "seed",
+        "specificity_level": "medium",
+        "should_ask_questions": true
+      },
+      "actual_results": {
+        "role_type": "executive",
+        "company_stage": "seed",
+        "specificity_score": 0.30999999999999994,
+        "questions_generated": 3,
+        "job_description_length": 3208,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:51.539501"
+    },
+    {
+      "scenario_name": "Detailed Marketing Request",
+      "request": "Need a senior marketing manager for our SaaS company, Series A stage, budget $90-110k, need someone with B2B experience, content marketing and demand gen, timeline is 8 weeks",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "marketing",
+        "company_stage": "series_a",
+        "specificity_level": "high",
+        "should_ask_questions": false
+      },
+      "actual_results": {
+        "role_type": "marketing",
+        "company_stage": "series_a",
+        "specificity_score": 0.85,
+        "questions_generated": 0,
+        "job_description_length": 3332,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:29:59.538592"
+    },
+    {
+      "scenario_name": "Operations Role Test",
+      "request": "Looking to hire a head of operations for our growing startup, need someone with scaling experience",
+      "success": true,
+      "expected_outcomes": {
+        "role_type": "operations",
+        "company_stage": "unknown",
+        "specificity_level": "low",
+        "should_ask_questions": true
+      },
+      "actual_results": {
+        "role_type": "operations",
+        "company_stage": "unknown",
+        "specificity_score": 0.26999999999999996,
+        "questions_generated": 3,
+        "job_description_length": 2953,
+        "workflow_path": "response_formatted",
+        "error": null
+      },
+      "analysis": {
+        "role_detection_correct": true,
+        "stage_detection_correct": true,
+        "specificity_appropriate": true,
+        "questions_appropriate": true,
+        "content_generated": true,
+        "workflow_completed": true,
+        "overall_success": true,
+        "score": 100.0
+      },
+      "timestamp": "2025-09-05T16:30:08.151052"
+    }
+  ]
+}
