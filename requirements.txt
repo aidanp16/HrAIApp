@@ -1,0 +1,29 @@
+# Core AI Framework
+langgraph>=0.0.40
+langchain>=0.1.0
+langchain-openai>=0.0.5
+openai>=1.0.0
+
+# Web Framework
+streamlit>=1.28.0
+
+# Database
+sqlite3
+
+# Data Processing
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Utilities
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+requests>=2.31.0
+
+# Development
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Optional: Advanced AI/ML features
+scikit-learn>=1.3.0
+transformers>=4.30.0
