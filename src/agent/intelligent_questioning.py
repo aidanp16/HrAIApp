@@ -2,8 +2,7 @@
 Intelligent Questioning System for HR Hiring Agent
 Implements adaptive questioning algorithm based on context and company stage
 
-UNIQUE AI FEATURE: Advanced context-aware questioning that goes beyond basic prompting
-to demonstrate sophisticated AI/ML understanding and reasoning capabilities.
+UNIQUE AI FEATURE: Advanced context-aware questioning that goes beyond basic prompting.
 """
 
 from typing import Dict, Any, List, Optional, Tuple
