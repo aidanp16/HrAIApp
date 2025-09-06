@@ -3,7 +3,7 @@ HR Hiring Agent - Main agent implementation using LangGraph
 Core agentic AI system that orchestrates the hiring assistance workflow
 """
 
-from typing import Dict, Any, List, Optional, TypedDict
+from typing import Dict, Any, List, Optional, TypedDict, Tuple
 from langgraph.graph import StateGraph, END, START
 import logging
 import os
@@ -282,34 +282,62 @@ class HiringAgent:
     
     def _generate_content_node(self, state: HiringState) -> HiringState:
         """
-        Node 4: Generate hiring content (job description, checklist, timeline)
-        Uses all accumulated context for rich, personalized generation
+        Node 4: Generate comprehensive hiring content using all specialized tools
+        Creates job description, hiring checklist, salary data, timeline, and interview questions
         """
-        self.logger.info("Generating hiring content with full context")
+        self.logger.info("Generating comprehensive hiring content with all specialized tools")
         
         try:
-            # Build comprehensive context for content generation
-            context_prompt = self._build_content_generation_context(state)
+            # Build comprehensive hiring context from state
+            hiring_context = self._build_hiring_context_from_state(state)
             
-            # Generate job description
-            job_description = self._generate_job_description(context_prompt, state)
+            # Initialize all tools
+            from ..tools.job_description_generator import JobDescriptionGeneratorTool
+            from ..tools.checklist_builder import ChecklistBuilderTool
+            from ..tools.search_tool import SearchSalaryTool
+            from ..tools.timeline_calculator import TimelineCalculatorTool
+            from ..tools.interview_generator import InterviewGeneratorTool
             
-            # Generate hiring checklist  
-            hiring_checklist = self._generate_hiring_checklist(context_prompt, state)
+            job_desc_tool = JobDescriptionGeneratorTool()
+            checklist_tool = ChecklistBuilderTool()
+            search_tool = SearchSalaryTool()
+            timeline_tool = TimelineCalculatorTool()
+            interview_tool = InterviewGeneratorTool()
             
-            # Generate timeline estimate
-            timeline_estimate = self._generate_timeline_estimate(context_prompt, state)
+            # Generate all components systematically
+            self.logger.info("Generating job description...")
+            job_description = job_desc_tool._run(hiring_context)
             
-            # Update state with generated content
+            self.logger.info("Generating hiring checklist...")
+            hiring_checklist = checklist_tool._run(hiring_context)
+            
+            self.logger.info("Generating salary benchmarking data...")
+            salary_data = search_tool._run(hiring_context)  # LLM generates comprehensive salary and market analysis
+            
+            self.logger.info("Generating hiring timeline...")
+            timeline_estimate = timeline_tool._run(hiring_context)
+            
+            self.logger.info("Generating interview questions...")
+            interview_questions = interview_tool._run(hiring_context)
+            
+            # Generate executive summary and recommendations
+            executive_summary = self._generate_executive_summary(hiring_context, state)
+            recommendations = self._generate_recommendations(hiring_context, state)
+            
+            # Update state with all generated content
             state.update({
                 'job_description': job_description,
                 'hiring_checklist': hiring_checklist,
+                'salary_data': salary_data,
                 'timeline_estimate': timeline_estimate,
+                'interview_questions': interview_questions,
+                'executive_summary': executive_summary,
+                'recommendations': recommendations,
                 'current_step': 'content_generated',
                 'is_complete': True
             })
             
-            self.logger.info("All hiring content generated successfully")
+            self.logger.info("Comprehensive hiring package generated successfully with all tools")
             
         except Exception as e:
             self.logger.error(f"Error in generate_content_node: {str(e)}")
@@ -321,14 +349,64 @@ class HiringAgent:
     def _format_response_node(self, state: HiringState) -> HiringState:
         """
         Node 5: Format the final response with all generated content
-        Creates structured output in markdown format
+        Creates comprehensive structured output combining all tools
         """
-        self.logger.info("Formatting final response")
+        self.logger.info("Formatting comprehensive final response")
         
         try:
-            # This will be implemented when we add the actual formatting logic
+            # Build the comprehensive hiring package document
+            sections = []
+            
+            # Executive Summary (if available)
+            if state.get('executive_summary'):
+                sections.append(state['executive_summary'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Job Description
+            if state.get('job_description'):
+                sections.append(state['job_description'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Salary Benchmarking Data
+            if state.get('salary_data'):
+                sections.append(state['salary_data'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Hiring Timeline
+            if state.get('timeline_estimate'):
+                sections.append(state['timeline_estimate'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Hiring Process Checklist
+            if state.get('hiring_checklist'):
+                sections.append(state['hiring_checklist'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Interview Questions
+            if state.get('interview_questions'):
+                sections.append(state['interview_questions'])
+                sections.append("\n" + "="*80 + "\n")
+            
+            # Final Recommendations
+            if state.get('recommendations'):
+                sections.append("# Final Recommendations\n")
+                for i, rec in enumerate(state['recommendations'], 1):
+                    sections.append(f"{i}. {rec}")
+                sections.append("\n")
+            
+            # Add footer with generation info
+            sections.append("---\n")
+            sections.append(f"*Generated by HR AI Assistant on {state.get('timestamp', 'Unknown')}*\n")
+            sections.append(f"*Session ID: {state.get('session_id', 'N/A')}*")
+            
+            # Combine all sections
+            formatted_response = "\n".join(sections)
+            
+            # Store formatted response in state
+            state['formatted_response'] = formatted_response
             state['current_step'] = 'response_formatted'
-            self.logger.info("Response formatted successfully")
+            
+            self.logger.info(f"Comprehensive hiring package formatted successfully ({len(formatted_response)} characters)")
             
         except Exception as e:
             self.logger.error(f"Error in format_response_node: {str(e)}")
@@ -494,7 +572,7 @@ class HiringAgent:
     
     def _build_content_generation_context(self, state: HiringState) -> str:
         """
-        Build comprehensive context string for content generation
+        Build comprehensive context string for content generation (legacy method)
         """
         context = f"""
         HIRING REQUEST CONTEXT:
@@ -513,6 +591,171 @@ class HiringAgent:
         Confidence Scores: {state['confidence_scores']}
         """
         return context
+    
+    def _build_hiring_context_from_state(self, state: HiringState) -> Dict[str, Any]:
+        """
+        Build simplified hiring context dictionary for LLM-based tools
+        Since tools now use LLM intelligence, they can extract details themselves
+        """
+        # Pass raw state data to LLM-based tools for intelligent extraction
+        hiring_context = {
+            # Core state information
+            "company_stage": state.get('company_stage', 'seed'),
+            "role_type": state.get('role_type', 'engineering'),
+            "urgency_level": state.get('urgency_level', 'medium'),
+            "has_budget": state.get('has_budget', False),
+            "has_timeline": state.get('has_timeline', False),
+            
+            # Raw context for LLM extraction
+            "original_request": state.get('original_request', ''),
+            "user_responses": state.get('user_responses', {}),
+            
+            # Analysis scores
+            "specificity_score": state.get('specificity_score', 0.5),
+            "confidence_scores": state.get('confidence_scores', {}),
+            
+            # Defaults for basic structure (LLM can override these)
+            "role_title": "Software Engineer",  # Default, LLM will extract actual role
+            "department": "Engineering",       # Default, LLM will determine from context  
+            "seniority_level": "mid",          # Default, LLM will extract from context
+            "location": "San Francisco, CA",   # Default, LLM will extract if mentioned
+            "remote_policy": "hybrid",         # Default, LLM will determine from context
+            "urgency": "normal",               # Default, LLM will map from urgency_level
+            "industry": "Technology",          # Default, LLM will infer from context
+            "tech_stack": "Not specified",     # Default, LLM will extract if mentioned
+        }
+        
+        return hiring_context
+    
+    def _generate_executive_summary(self, hiring_context: Dict[str, Any], state: HiringState) -> str:
+        """
+        Generate executive summary of the hiring plan
+        """
+        role_title = hiring_context.get('role_title', 'Software Engineer')
+        company_stage = hiring_context.get('company_stage', 'seed')
+        urgency = hiring_context.get('urgency', 'normal')
+        
+        summary = f"""# Executive Summary: {role_title} Hiring Plan
+
+**Company Stage:** {company_stage.title()}
+**Role:** {role_title}
+**Timeline:** {self._estimate_summary_timeline(hiring_context)}
+**Priority:** {urgency.title()}
+
+## Key Insights
+"""
+        
+        insights = []
+        
+        if company_stage == 'seed':
+            insights.append("• **Early-stage focus:** Prioritize cultural fit and adaptability over perfect skill match")
+            insights.append("• **Equity opportunity:** Leverage equity compensation to attract top talent")
+        elif company_stage == 'series_a':
+            insights.append("• **Growth phase:** Balance experience with growth potential")
+            insights.append("• **Process building:** Establish scalable hiring practices")
+        else:
+            insights.append("• **Established company:** Focus on specialized skills and cultural enhancement")
+            insights.append("• **Competitive market:** Prepare strong value proposition")
+        
+        if urgency == 'urgent':
+            insights.append("• **Expedited timeline:** Consider parallel interview processes and pre-approved offer ranges")
+        
+        if hiring_context.get('tech_stack'):
+            tech_list = ', '.join(hiring_context['tech_stack'][:3])
+            insights.append(f"• **Technical focus:** {tech_list} experience will be key differentiator")
+        
+        summary += '\n'.join(insights)
+        summary += "\n\n## Recommendations\n"
+        summary += "• Review salary benchmarking data to ensure competitive positioning\n"
+        summary += "• Follow the structured interview process to maintain consistency\n"
+        summary += "• Prepare for multiple offer scenarios to close quickly\n"
+        
+        return summary
+    
+    def _generate_recommendations(self, hiring_context: Dict[str, Any], state: HiringState) -> List[str]:
+        """
+        Generate actionable recommendations based on hiring context
+        """
+        recommendations = []
+        
+        company_stage = hiring_context.get('company_stage', 'seed')
+        urgency = hiring_context.get('urgency', 'normal')
+        role_type = self._get_role_category(hiring_context.get('role_title', ''))
+        
+        # Stage-specific recommendations
+        if company_stage == 'seed':
+            recommendations.extend([
+                "Focus on hiring for potential and cultural fit over perfect skill match",
+                "Leverage equity compensation story to attract talent above salary band",
+                "Involve founders directly in the interview process for culture alignment"
+            ])
+        elif company_stage == 'series_a':
+            recommendations.extend([
+                "Balance experience requirements with growth stage realities",
+                "Implement structured interview process for consistent evaluation",
+                "Build employer brand story around growth opportunity and impact"
+            ])
+        else:
+            recommendations.extend([
+                "Emphasize career development and advancement opportunities",
+                "Showcase technical environment and engineering culture",
+                "Prepare for competitive negotiation process"
+            ])
+        
+        # Urgency-specific recommendations
+        if urgency in ['urgent', 'critical']:
+            recommendations.extend([
+                "Consider fast-track interview process with compressed timeline",
+                "Pre-approve salary ranges to accelerate offer process",
+                "Leverage network and referrals for immediate candidate pipeline"
+            ])
+        
+        # Role-specific recommendations
+        if role_type == 'engineering':
+            recommendations.extend([
+                "Prepare technical environment demo and development workflow overview",
+                "Have senior engineers participate in technical interviews"
+            ])
+        elif role_type == 'product':
+            recommendations.append("Prepare product roadmap overview and success metrics discussion")
+        elif role_type == 'sales':
+            recommendations.append("Have sales leadership discuss territory and commission structure")
+        
+        # Market-specific recommendations
+        location = hiring_context.get('location', '')
+        if 'San Francisco' in location or 'New York' in location:
+            recommendations.append("Prepare for competitive market dynamics with multiple offer scenarios")
+        
+        return recommendations
+    
+    def _get_role_category(self, role_title: str) -> str:
+        """Get role category for recommendations"""
+        role_lower = role_title.lower()
+        
+        if any(term in role_lower for term in ['engineer', 'developer', 'architect']):
+            return 'engineering'
+        elif 'product' in role_lower:
+            return 'product'
+        elif 'sales' in role_lower:
+            return 'sales'
+        elif 'marketing' in role_lower:
+            return 'marketing'
+        else:
+            return 'general'
+    
+    def _estimate_summary_timeline(self, hiring_context: Dict[str, Any]) -> str:
+        """Quick timeline estimate for summary"""
+        urgency = hiring_context.get('urgency', 'normal')
+        seniority = hiring_context.get('seniority_level', 'mid')
+        
+        base_weeks = {'junior': 4, 'mid': 6, 'senior': 8, 'lead': 10}.get(seniority, 6)
+        
+        if urgency == 'urgent':
+            base_weeks = max(2, int(base_weeks * 0.7))
+        elif urgency == 'critical':
+            base_weeks = max(1, int(base_weeks * 0.5))
+        
+        return f"{base_weeks} weeks"
     
     def _generate_job_description(self, context: str, state: HiringState) -> str:
         """
@@ -602,9 +845,14 @@ class HiringAgent:
             return {
                 'success': True,
                 'state': final_state,
+                'formatted_response': final_state.get('formatted_response'),
                 'job_description': final_state.get('job_description'),
                 'hiring_checklist': final_state.get('hiring_checklist'),
+                'salary_data': final_state.get('salary_data'),
                 'timeline_estimate': final_state.get('timeline_estimate'),
+                'interview_questions': final_state.get('interview_questions'),
+                'executive_summary': final_state.get('executive_summary'),
+                'recommendations': final_state.get('recommendations'),
                 'questions_asked': final_state.get('questions_asked', []),
                 'error_message': final_state.get('error_message')
             }
