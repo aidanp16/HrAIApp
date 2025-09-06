@@ -1,0 +1,29 @@
+👤 You (02:36:39)
+I need to hire a senior backend engineer
+🤖 HR Assistant (02:38:11)
+✅ **Analysis Complete!** I've generated a comprehensive hiring package for you. Check the details below.
+👤 You (02:38:32)
+Series A, 50 employees and 6 weeks
+🤖 HR Assistant (02:39:49)
+✅ **Analysis Complete!** I've generated a comprehensive hiring package for you. Check the details below.
+📋 Your Comprehensive Hiring Package
+🎯 Role Type
+Unknown
+
+🏢 Company Stage
+Series A
+
+📊 Specificity Score
+0.12
+
+❓ Questions Generated
+3
+
+❓ Questions for Better Context
+The assistant generated these questions to help create a more targeted hiring plan:
+
+1. What type of role are you looking to fill - engineering, marketing, sales, or executive?
+
+2. What's your budget range for this role?
+
+3. What would this person's main responsibilities be?
